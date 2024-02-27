@@ -1,50 +1,61 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-
-// export default function App() {
-//   return (
-//     <View style={styles.container}>
-//       <Text>Hello world</Text>
-//       <StatusBar style="auto" />
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     fontSize: 64,
-//   },
-// });
-
-const LotsOfStyles = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.red}>just red</Text>
-      <Text style={styles.bigBlue}>just bigBlue</Text>
-      <Text style={[styles.bigBlue, styles.red]}>bigBlue, then red</Text>
-      <Text style={[styles.red, styles.bigBlue]}>red, then bigBlue</Text>
-    </View>
-  );
-};
+// import { StatusBar } from 'expo-status-bar';
+import React, {useState, useEffect} from 'react';
+import { StyleSheet, Text, View, Image, ScrollView, FlatList } from 'react-native';
+import axios from 'axios';
 
 const styles = StyleSheet.create({
   container: {
     marginTop: 50,
     flex: 1,
-    alignItems: 'center',
+    paddingTop: 22,
   },
-  bigBlue: {
-    color: 'blue',
-    fontWeight: 'bold',
-    fontSize: 30,
-  },
-  red: {
-    color: 'red',
+  item: {
+    padding: 10,
+    fontSize: 18,
+    height: 44,
   },
 });
 
-export default LotsOfStyles;
+function App () {
+  console.log('render App');
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    console.log('useEffect');
+    async function getPosts() {
+      try {
+        const response = await axios.get('http://192.168.1.159:3000/api/v1/posts');
+        console.log(response.data);
+        setPosts(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getPosts();
+    return () => {
+      console.log('cleanup');
+    };
+  }, []);
+
+  return (
+    // <View style={{marginTop: 50}}>
+    //   {posts.map((post) => (
+    //     <View key={post.id}>
+    //       <Text>{post.id} - {post.title} - {post.user.user_name}</Text>
+    //     </View>
+    //   ))}
+    // </View>
+
+    <View style={styles.container}>
+      <FlatList
+        data = {posts}
+        renderItem = {({ item }) =>
+          <Text style={styles.item}>
+            {item.title} - Author : {item.user.user_name}
+          </Text>}
+      />
+    </View>
+  );
+};
+
+export default App;
