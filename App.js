@@ -1,7 +1,8 @@
 // import { StatusBar } from 'expo-status-bar';
 import React, {useState, useEffect} from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, FlatList } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, Modal, Alert, TouchableOpacity, Pressable } from 'react-native';
 import axios from 'axios';
+import {PostModal} from './src/components/core';
 
 const styles = StyleSheet.create({
   container: {
@@ -11,17 +12,31 @@ const styles = StyleSheet.create({
   },
   item: {
     padding: 10,
-    fontSize: 18,
-    height: 44,
+    marginTop: 30,
+    marginHorizontal: 10,
+    height: 50,
+    backgroundColor: '#2873',
+    borderRadius: 10,
+  },
+  headerOne: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'dodgerblue',
+  },
+  textPrimary: {
+    color: 'dodgerblue',
+    fontSize: 14,
+    marginTop: 15,
   },
 });
 
 function App () {
-  console.log('render App');
   const [posts, setPosts] = useState([]);
+  const [postInModal, setPostInModal] = useState({});//[post, setPostInModal
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    console.log('useEffect');
+    // console.log('useEffect');
     async function getPosts() {
       try {
         const response = await axios.get('http://192.168.1.159:3000/api/v1/posts');
@@ -32,29 +47,51 @@ function App () {
       }
     }
     getPosts();
-    return () => {
-      console.log('cleanup');
-    };
+    // return () => {
+    //   console.log('cleanup');
+    // };
   }, []);
 
-  return (
-    // <View style={{marginTop: 50}}>
-    //   {posts.map((post) => (
-    //     <View key={post.id}>
-    //       <Text>{post.id} - {post.title} - {post.user.user_name}</Text>
-    //     </View>
-    //   ))}
-    // </View>
+  const openModal = (post) => {
+    setPostInModal(post)
+    setModalVisible(true);
+  };
 
-    <View style={styles.container}>
-      <FlatList
-        data = {posts}
-        renderItem = {({ item }) =>
-          <Text style={styles.item}>
-            {item.title} - Author : {item.user.user_name}
-          </Text>}
-      />
-    </View>
+  return (
+    <ScrollView style={{marginTop: 50}}>
+      {posts.map((post) => (
+        <View key={post.id} style={styles.item}>
+          {/* <TouchableOpacity activeOpacity={0.6} onPress={openModal}> */}
+          <TouchableOpacity activeOpacity={0.6} onPress={()=>openModal(post)}>
+          {/* <TouchableOpacity activeOpacity={0.6} onPress={openModal()}> */}
+
+            <Text style={styles.headerOne} >
+              {post.id} - {post.title}
+            </Text>
+          </TouchableOpacity>
+          <Text style={styles.textPrimary}>
+            Author: {post.user.user_name}
+          </Text>
+        </View>
+      ))}
+
+    <PostModal
+      modalVisible={modalVisible}
+      setModalVisible={setModalVisible}
+      postInModal={postInModal}
+    />
+
+    </ScrollView>
+
+    // <View style={styles.container}>
+    //   <FlatList
+    //     data = {posts}
+    //     renderItem = {({ item }) =>
+    //       <Text style={[styles.item, styles.headerOne]}>
+    //         {item.title} - Author : {item.user.user_name}
+    //       </Text>}
+    //   />
+    // </View>
   );
 };
 
