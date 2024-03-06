@@ -5,40 +5,45 @@ import { PostModal } from "../components/core";
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 50,
-    flex: 1,
-    paddingTop: 22,
+    marginBottom: 50,
+    flex: 2,
+    padding: 10,
   },
   item: {
-    padding: 10,
-    marginTop: 30,
-    marginHorizontal: 10,
-    height: 50,
-    backgroundColor: '#2873',
-    borderRadius: 10,
+    margin: 10,
+    flexDirection: 'column',
+    height: 70,
+
   },
   headerOne: {
-    fontSize: 24,
+    padding: 10,
+    backgroundColor: '#2873',
+    borderRadius: 10,
+    fontSize: 20,
     fontWeight: 'bold',
     color: 'dodgerblue',
   },
   textPrimary: {
     color: 'dodgerblue',
     fontSize: 14,
-    marginTop: 15,
   },
 });
 
-function Posts ({navigation}) {
+
+function Posts ({ route, navigation }) {
   const [posts, setPosts] = useState([]);
   const [postInModal, setPostInModal] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
+  const { accessToken, refreshToken, resourceOwer } = route.params;
+  const config = {
+    headers: { Authorization: `Bearer ${accessToken}` }
+};
 
   useEffect(() => {
-    // console.log('useEffect');
+    console.log('useEffect');
     async function getPosts() {
       try {
-        const response = await axios.get('http://192.168.1.159:3000/api/v1/posts');
+        const response = await axios.get('http://192.168.1.159:3000/api/v1/posts', config);
         console.log(response.data);
         setPosts(response.data);
       } catch (error) {
@@ -57,7 +62,7 @@ function Posts ({navigation}) {
   };
 
   return (
-    <ScrollView style={{marginTop: 50}}>
+    <ScrollView style={styles.container}>
       {posts.map((post) => (
         <View key={post.id} style={styles.item}>
           {/* <TouchableOpacity activeOpacity={0.6} onPress={openModal}> */}
@@ -66,6 +71,7 @@ function Posts ({navigation}) {
               {post.id} - {post.title}
             </Text>
           </TouchableOpacity>
+          <View style = {{marginTop: 5}}/>
           <Text style={styles.textPrimary}>
             Author: {post.user.user_name}
           </Text>

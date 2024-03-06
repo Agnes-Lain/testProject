@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import { SafeAreaView, View, TextInput, StyleSheet, Button, Text } from "react-native"
+import axios from 'axios';
+import { SafeAreaView, View, TextInput, StyleSheet, Button, Text } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
@@ -28,17 +29,34 @@ function LogInScreen ({navigation}) {
   // navigation={navigation}
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
-  // const [token, setToken] = useState();
+  const [accessToken, setAccessToken] = useState();
+  const [refreshToken, setRefreshToken] = useState();
+  const [resourceOwer, setResourceOwer] = useState();
 
-  const getUser = async ( email, password ) => {
-    console.log(email, password);
+  async function navigateToPosts(email, password) {
+    // console.log(email, password);
     try {
-      const response = await axios.get('http://192.168.1.159:3000/api/v1/');
-      console.log(response.data);
+      const response = await axios.post('http://192.168.1.159:3000/users/tokens/sign_in',{
+        email: email,
+        password: password
+      })
+      .then (response => {
+        console.log(response.data);
+        setAccessToken(response.data.token);
+        setRefreshToken(response.data.refresh_token);
+        setResourceOwer(response.data.resource_owner)
+        // console.log(token);
+      })
     } catch (error) {
-      console.log(error)
+      console.error(error);
     }
   }
+
+  useEffect(() => {
+    if (accessToken) {
+      navigation.navigate('Posts', {accessToken, refreshToken, resourceOwer});
+    }
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -57,7 +75,7 @@ function LogInScreen ({navigation}) {
 
       <Button
         title="Login now"
-        onPress={()=>getUser( email, password )}
+        onPress={()=>navigateToPosts( email, password )}
       />
     </SafeAreaView>
   )
