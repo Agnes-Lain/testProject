@@ -25,20 +25,27 @@ const styles = StyleSheet.create({
   },
 });
 
-function LogInScreen ({navigation}) {
+function SignUpScreen ({navigation}) {
   // navigation={navigation}
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
+  const [rePassword, setRePassword] = useState();
+  const [userName, setUserName] = useState();
   const [accessToken, setAccessToken] = useState();
   const [refreshToken, setRefreshToken] = useState();
   const [resourceOwer, setResourceOwer] = useState();
 
-  async function navigateToPosts(email, password) {
+  async function registerUser(email, password, rePassword, userName) {
     // console.log(email, password);
+    if (password !== rePassword) {
+      alert('Passwords do not match');
+      return;
+    }
     try {
-      const response = await axios.post('http://192.168.1.159:3000/users/tokens/sign_in',{
+      const response = await axios.post('http://192.168.1.159:3000/users/tokens/sign_up',{
         email: email,
-        password: password
+        password: password,
+        user_name: userName
       })
       .then (response => {
         console.log(response.data);
@@ -73,18 +80,25 @@ function LogInScreen ({navigation}) {
         value={password}
       />
 
-      <Button
-        title="Login now"
-        onPress={()=>navigateToPosts( email, password )}
+      <Text>Re-confirm Password :</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={setRePassword}
+        value={rePassword}
       />
-      <View style={{marginBottom: 20}}/>
+      <Text>Add a Username :</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={setUserName}
+        value={userName}
+      />
 
       <Button
         title="Sign up now"
-        onPress={()=>{navigation.navigate('SignUp')}}
+        onPress={()=>registerUser( email, password, rePassword, userName )}
       />
     </SafeAreaView>
   )
 };
 
-export default LogInScreen;
+export default SignUpScreen;
