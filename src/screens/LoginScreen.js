@@ -1,6 +1,7 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
+import React, {useState} from 'react';
 import { SafeAreaView, View, TextInput, StyleSheet, Button, Text } from "react-native";
+import { signIn } from '../modules/Authentify';
+import { useNavigation } from '@react-navigation/native';
 
 const styles = StyleSheet.create({
   container: {
@@ -25,38 +26,11 @@ const styles = StyleSheet.create({
   },
 });
 
-function LogInScreen ({navigation}) {
-  // navigation={navigation}
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
-  const [accessToken, setAccessToken] = useState();
-  const [refreshToken, setRefreshToken] = useState();
-  const [resourceOwer, setResourceOwer] = useState();
-
-  async function navigateToPosts(email, password) {
-    // console.log(email, password);
-    try {
-      const response = await axios.post('http://192.168.1.159:3000/users/tokens/sign_in',{
-        email: email,
-        password: password
-      })
-      .then (response => {
-        console.log(response.data);
-        setAccessToken(response.data.token);
-        setRefreshToken(response.data.refresh_token);
-        setResourceOwer(response.data.resource_owner)
-        // console.log(token);
-      })
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  useEffect(() => {
-    if (accessToken) {
-      navigation.navigate('Posts', {accessToken, refreshToken, resourceOwer});
-    }
-  });
+function LoginScreen ({ test }) {
+  const navigation = useNavigation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  // const [accessToken, setAccessToken] = useState();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -75,16 +49,16 @@ function LogInScreen ({navigation}) {
 
       <Button
         title="Login now"
-        onPress={()=>navigateToPosts( email, password )}
+        onPress={()=>{signIn(email, password, test)}}
       />
       <View style={{marginBottom: 20}}/>
 
       <Button
         title="Sign up now"
-        onPress={()=>{navigation.navigate('SignUp')}}
+        onPress={() => navigation.navigate('SignUp') }
       />
     </SafeAreaView>
   )
 };
 
-export default LogInScreen;
+export default LoginScreen;

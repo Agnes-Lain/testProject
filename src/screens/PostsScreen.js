@@ -1,19 +1,22 @@
 import React, {useState, useEffect} from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Button } from 'react-native';
 import axios from 'axios';
 import { PostModal } from "../components/core";
+import { getValueFor, signOut } from '../modules/Authentify';
+
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: 50,
-    flex: 2,
+  maincontainer: {
+    marginBottom: 70,
+    height: '100%',
     padding: 10,
+  },
+  main: {
+    flex: 1,
   },
   item: {
     margin: 10,
-    flexDirection: 'column',
     height: 70,
-
   },
   headerOne: {
     padding: 10,
@@ -27,33 +30,40 @@ const styles = StyleSheet.create({
     color: 'dodgerblue',
     fontSize: 14,
   },
+  bottomView: {
+    width: '100%',
+    height: 70,
+    // flex: 1,
+    backgroundColor: 'grey',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute', //Here is the trick
+    bottom: 0, //Here is the trick
+  },
 });
 
 
-function Posts ({ route, navigation }) {
+function Posts ({test}) {
   const [posts, setPosts] = useState([]);
   const [postInModal, setPostInModal] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
-  const { accessToken, refreshToken, resourceOwer } = route.params;
-  const config = {
-    headers: { Authorization: `Bearer ${accessToken}` }
-};
 
   useEffect(() => {
-    console.log('useEffect');
+    // console.log('useEffect');
     async function getPosts() {
       try {
+        const token = await getValueFor("accessToken");
+        const config = {
+          headers: { Authorization: `Bearer ${token}` }
+        };
         const response = await axios.get('http://192.168.1.159:3000/api/v1/posts', config);
-        console.log(response.data);
+        // console.log('response.data: ', response.data);
         setPosts(response.data);
       } catch (error) {
         console.error(error);
       }
     }
     getPosts();
-    // return () => {
-    //   console.log('cleanup');
-    // };
   }, []);
 
   const openModal = (post) => {
@@ -62,29 +72,37 @@ function Posts ({ route, navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {posts.map((post) => (
-        <View key={post.id} style={styles.item}>
-          {/* <TouchableOpacity activeOpacity={0.6} onPress={openModal}> */}
-          <TouchableOpacity activeOpacity={0.6} onPress={()=>openModal(post)}>
-            <Text style={styles.headerOne} >
-              {post.id} - {post.title}
+    <View style={styles.main}>
+    <ScrollView style={{flex: 1}}>
+      <View style={styles.maincontainer}>
+        {posts.map((post) => (
+          <View key={post.id} style={styles.item}>
+            <TouchableOpacity activeOpacity={0.6} onPress={()=>openModal(post)}>
+              <Text style={styles.headerOne}>
+                {post.id} - {post.title}
+              </Text>
+            </TouchableOpacity>
+            <View style = {{marginTop: 5}}/>
+            <Text style={styles.textPrimary}>
+              Author: {post.user.user_name}
             </Text>
-          </TouchableOpacity>
-          <View style = {{marginTop: 5}}/>
-          <Text style={styles.textPrimary}>
-            Author: {post.user.user_name}
-          </Text>
-        </View>
-      ))}
-
+          </View>
+        ))}
+      </View>
+    </ScrollView>
     <PostModal
       modalVisible={modalVisible}
       setModalVisible={setModalVisible}
       postInModal={postInModal}
     />
-    </ScrollView>
+    <View style={styles.bottomView}>
+      <Button
+        title="Log out"
+        onPress={()=>{signOut(test)}}
+      />
+    </View>
+  </View>
   )
-};
+}
 
 export default Posts;

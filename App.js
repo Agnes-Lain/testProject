@@ -1,26 +1,73 @@
-// import { StatusBar } from 'expo-status-bar';
-// import React, {useState, useEffect} from 'react';
-// import { Text, View, Button } from 'react-native';
-// import axios from 'axios';
-// import {PostModal} from './src/components/core';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import HomeScreen  from './src/screens/HomeScreen';
+import React, {useEffect, useState} from 'react';
+import { View, Text } from 'react-native';
+// import HomeScreen  from './src/screens/HomeScreen';
 import Posts  from './src/screens/PostsScreen';
-import LogInScreen  from './src/screens/LoginScreen';
+import LoginScreen  from './src/screens/LoginScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
+import { checkingAccess } from './src/modules/Authentify';
 
-const Stack = createNativeStackNavigator();
+const LoggedStack = createNativeStackNavigator();
+const UnloggedStack = createNativeStackNavigator();
+
+function LoggedStackScreens({test}) {
+  return (
+    <LoggedStack.Navigator>
+      <LoggedStack.Screen name="Posts" component={()=> <Posts test={test}/>} />
+    </LoggedStack.Navigator>
+  )
+}
+
+function UnloggedStackScreens({ test }) {
+  return (
+    <UnloggedStack.Navigator>
+      <UnloggedStack.Screen name="Login" component={()=> <LoginScreen test={test} />} />
+      <UnloggedStack.Screen name="SignUp" component={()=> <SignUpScreen test={test} />} />
+    </UnloggedStack.Navigator>
+  )
+}
+
 
 function App() {
+  const [ haveAccess, setHaveAccess ] = useState(false);
+  const [checkingToken, setCheckingToken] = useState(true);
+
+  function test(accessStatus) {
+    console.log("test function is called with status: " + accessStatus);
+    if (accessStatus === 200 || accessStatus === 201){
+      setHaveAccess(true);
+    } else {
+      setHaveAccess(false);
+    }
+  }
+
+  useEffect(() => {
+    async function checkToken() {
+      const accessStatus = await checkingAccess();
+      setHaveAccess(accessStatus);
+      // const token = await getValueFor("accessToken");
+      // console.log ('stock token is:\n' + token);
+      setCheckingToken(false);
+      // setAccessToken(token);
+    }
+    checkToken();
+  }, []);
+
+  if (checkingToken) {
+    return (
+      <View>
+        <Text>Checking token...</Text>
+      </View>
+    )
+  }
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        {/* <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Overview' }}/> */}
-        <Stack.Screen name="Login" component={LogInScreen} />
-        <Stack.Screen name="Posts" component={Posts} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
-      </Stack.Navigator>
+        { haveAccess ? (
+          <LoggedStackScreens test={test} />
+          ) : (
+          <UnloggedStackScreens test={test} />
+        )}
     </NavigationContainer>
   );
 };

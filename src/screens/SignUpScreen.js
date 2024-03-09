@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import { SafeAreaView, View, TextInput, StyleSheet, Button, Text } from "react-native";
+import { registerUser } from '../modules/Authentify';
 
 const styles = StyleSheet.create({
   container: {
@@ -25,45 +26,12 @@ const styles = StyleSheet.create({
   },
 });
 
-function SignUpScreen ({navigation}) {
+function SignUpScreen ({test}) {
   // navigation={navigation}
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
-  const [rePassword, setRePassword] = useState();
-  const [userName, setUserName] = useState();
-  const [accessToken, setAccessToken] = useState();
-  const [refreshToken, setRefreshToken] = useState();
-  const [resourceOwer, setResourceOwer] = useState();
-
-  async function registerUser(email, password, rePassword, userName) {
-    // console.log(email, password);
-    if (password !== rePassword) {
-      alert('Passwords do not match');
-      return;
-    }
-    try {
-      const response = await axios.post('http://192.168.1.159:3000/users/tokens/sign_up',{
-        email: email,
-        password: password,
-        user_name: userName
-      })
-      .then (response => {
-        console.log(response.data);
-        setAccessToken(response.data.token);
-        setRefreshToken(response.data.refresh_token);
-        setResourceOwer(response.data.resource_owner)
-        // console.log(token);
-      })
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  useEffect(() => {
-    if (accessToken) {
-      navigation.navigate('Posts', {accessToken, refreshToken, resourceOwer});
-    }
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [rePassword, setRePassword] = useState('');
+  const [userName, setUserName] = useState('');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -95,7 +63,7 @@ function SignUpScreen ({navigation}) {
 
       <Button
         title="Sign up now"
-        onPress={()=>registerUser( email, password, rePassword, userName )}
+        onPress={()=>registerUser( email, password, rePassword, userName, test )}
       />
     </SafeAreaView>
   )
