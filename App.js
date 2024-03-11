@@ -7,6 +7,7 @@ import Posts  from './src/screens/PostsScreen';
 import LoginScreen  from './src/screens/LoginScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import { checkingAccess } from './src/modules/Authentify';
+import NewPostScreen from './src/screens/NewPostScreen';
 
 const LoggedStack = createNativeStackNavigator();
 const UnloggedStack = createNativeStackNavigator();
@@ -15,6 +16,7 @@ function LoggedStackScreens({test}) {
   return (
     <LoggedStack.Navigator>
       <LoggedStack.Screen name="Posts" component={()=> <Posts test={test}/>} />
+      <LoggedStack.Screen name="NewPost" component={NewPostScreen} />
     </LoggedStack.Navigator>
   )
 }

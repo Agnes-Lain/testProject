@@ -1,18 +1,19 @@
 import React, {useState, useEffect} from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Button } from 'react-native';
-import axios from 'axios';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Button, TouchableHighlight } from 'react-native';
 import { PostModal } from "../components/core";
-import { getValueFor, signOut } from '../modules/Authentify';
+import { signOut } from '../modules/Authentify';
+import { useNavigation } from '@react-navigation/native';
+import { getPosts, deletePost } from '../modules/HandlePost';
 
 
 const styles = StyleSheet.create({
+  main: {
+    flex: 1,
+  },
   maincontainer: {
     marginBottom: 70,
     height: '100%',
     padding: 10,
-  },
-  main: {
-    flex: 1,
   },
   item: {
     margin: 10,
@@ -35,36 +36,52 @@ const styles = StyleSheet.create({
     height: 70,
     // flex: 1,
     backgroundColor: 'grey',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
     position: 'absolute', //Here is the trick
     bottom: 0, //Here is the trick
+    flexDirection: 'row',
   },
 });
-
 
 function Posts ({test}) {
   const [posts, setPosts] = useState([]);
   const [postInModal, setPostInModal] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
+  const [isReRender,setIsReRender] = useState(false);
+  const navigation = useNavigation();
+
+  function reRenderPosts(status) {
+    if (status === 200 || status === 201 || status === 204){
+      // console.log("called reRenderPosts");
+      setIsReRender(!isReRender);
+      // console.log("isReRender is now: " + isReRender);
+    }
+  };
+
+  const removePost = async (post_id) => {
+    // Fetch data from your API and update the state
+    try {
+      const returnStatus = await deletePost(post_id)
+      console.log(returnStatus)
+      reRenderPosts(returnStatus)
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     // console.log('useEffect');
-    async function getPosts() {
+    async function loadPosts() {
       try {
-        const token = await getValueFor("accessToken");
-        const config = {
-          headers: { Authorization: `Bearer ${token}` }
-        };
-        const response = await axios.get('http://192.168.1.159:3000/api/v1/posts', config);
-        // console.log('response.data: ', response.data);
-        setPosts(response.data);
+        const posts = await getPosts();
+        setPosts(posts);
       } catch (error) {
         console.error(error);
       }
     }
-    getPosts();
-  }, []);
+    loadPosts();
+  }, [isReRender]);
 
   const openModal = (post) => {
     setPostInModal(post)
@@ -82,10 +99,16 @@ function Posts ({test}) {
                 {post.id} - {post.title}
               </Text>
             </TouchableOpacity>
-            <View style = {{marginTop: 5}}/>
-            <Text style={styles.textPrimary}>
-              Author: {post.user.user_name}
-            </Text>
+            <View style = {{marginTop: 5, flexDirection:'row', justifyContent: 'space-between'}}>
+              <Text style={styles.textPrimary}>
+                Author: {post.user.user_name}
+              </Text>
+              <TouchableHighlight onPress={()=>{removePost(post.id)}}>
+                <View>
+                    <Text style={{color:'red'}}>Delete</Text>
+                </View>
+              </TouchableHighlight>
+            </View>
           </View>
         ))}
       </View>
@@ -99,6 +122,10 @@ function Posts ({test}) {
       <Button
         title="Log out"
         onPress={()=>{signOut(test)}}
+      />
+      <Button
+        title="New post"
+        onPress={()=>navigation.navigate('NewPost')}
       />
     </View>
   </View>
