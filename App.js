@@ -58,7 +58,7 @@ function App() {
 
   if (checkingToken) {
     return (
-      <View>
+      <View style={{justifyContent:'center',flex: 1, alignItems: 'center'}}>
         <Text>Checking token...</Text>
       </View>
     )

@@ -7,7 +7,7 @@ const API_URL = "http://192.168.1.159:3000/api/v1/posts";
 async function setConfig () {
   try {
     const hasAccess = await checkingAccess();
-    console.log('hasAccess: ', hasAccess);
+    // console.log('hasAccess: ', hasAccess);
     if (hasAccess) {
       const token = await getValueFor("accessToken");
       const config = {
@@ -35,9 +35,9 @@ async function setConfig () {
 
   async function deletePost(post_id) {
     try {
-      console.log("process delete")
+      // console.log("process delete")
       const config = await setConfig();
-      console.log(config)
+      // console.log(config)
       const response = await axios.delete(`${API_URL}/${post_id}`, config);
       return response.status;
     } catch (error) {
