@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
 });
 
-function NewPostScreen () {
+function NewPostScreen ({ loadPosts }) {
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -35,7 +35,9 @@ function NewPostScreen () {
     const status = await postNewPost(title, content);
     console.log("status is: " + status);
     if (status === 201){
+      // TODO add post to post list or refresh the list
       navigation.navigate('Posts');
+      loadPosts();
     }
   }
 
@@ -56,7 +58,7 @@ function NewPostScreen () {
 
       <Button
         title="Add a new post now"
-        onPress={()=>{returnToPosts()}}
+        onPress={()=>returnToPosts()}
       />
     </View>
   )

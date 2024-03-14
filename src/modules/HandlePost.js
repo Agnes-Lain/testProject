@@ -34,15 +34,16 @@ async function setConfig () {
 
 
   async function deletePost(post_id) {
-    try {
+    // throw new Error('BOUH!!!!');
+    // try {
       // console.log("process delete")
       const config = await setConfig();
       // console.log(config)
       const response = await axios.delete(`${API_URL}/${post_id}`, config);
       return response.status;
-    } catch (error) {
-      console.log(error);
-    }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   };
 
   async function postNewPost(title, content) {

@@ -8,15 +8,38 @@ import LoginScreen  from './src/screens/LoginScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import { checkingAccess } from './src/modules/Authentify';
 import NewPostScreen from './src/screens/NewPostScreen';
+import { getPosts } from './src/modules/HandlePost';
 
 const LoggedStack = createNativeStackNavigator();
 const UnloggedStack = createNativeStackNavigator();
 
-function LoggedStackScreens({test}) {
+/*
+const props = {
+  test: function test() {
+    console.log('test');
+  },
+  posts: [],
+  setPosts: function setPosts() {
+    console.log('setPosts');
+  }
+}
+*/
+
+function LoggedStackScreens({test, posts, loadPosts}) {
+// function LoggedStackScreens(props) {
+//   const { test, posts, setPosts } = props;
+
+  // const test = props.test;
+  // const { test: test } = props;
+  // const { test } = props;
+
+  // const posts = props.posts;
+  // const setPosts = props.setPosts;
+
   return (
     <LoggedStack.Navigator>
-      <LoggedStack.Screen name="Posts" component={()=> <Posts test={test}/>} />
-      <LoggedStack.Screen name="NewPost" component={NewPostScreen} />
+      <LoggedStack.Screen name="Posts" component={()=> <Posts test={test} posts={posts} loadPosts={loadPosts} />} />
+      <LoggedStack.Screen name="NewPost" component={() => <NewPostScreen loadPosts={loadPosts} />} />
     </LoggedStack.Navigator>
   )
 }
@@ -32,8 +55,9 @@ function UnloggedStackScreens({ test }) {
 
 
 function App() {
-  const [ haveAccess, setHaveAccess ] = useState(false);
+  const [haveAccess, setHaveAccess] = useState(false);
   const [checkingToken, setCheckingToken] = useState(true);
+  const [posts, setPosts] = useState([]);
 
   function test(accessStatus) {
     console.log("test function is called with status: " + accessStatus);
@@ -44,6 +68,16 @@ function App() {
     }
   }
 
+  async function loadPosts() {
+    console.log('loadPosts');
+    try {
+      const posts = await getPosts();
+      setPosts(posts);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   useEffect(() => {
     async function checkToken() {
       const accessStatus = await checkingAccess();
@@ -51,6 +85,7 @@ function App() {
       // const token = await getValueFor("accessToken");
       // console.log ('stock token is:\n' + token);
       setCheckingToken(false);
+      loadPosts();
       // setAccessToken(token);
     }
     checkToken();
@@ -66,7 +101,7 @@ function App() {
   return (
     <NavigationContainer>
         { haveAccess ? (
-          <LoggedStackScreens test={test} />
+          <LoggedStackScreens test={test} posts={posts} loadPosts={loadPosts}/>
           ) : (
           <UnloggedStackScreens test={test} />
         )}
