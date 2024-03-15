@@ -44,10 +44,10 @@ function LoggedStackScreens({test, posts, loadPosts}) {
   )
 }
 
-function UnloggedStackScreens({ test }) {
+function UnloggedStackScreens({ test, loadPosts}) {
   return (
     <UnloggedStack.Navigator>
-      <UnloggedStack.Screen name="Login" component={()=> <LoginScreen test={test} />} />
+      <UnloggedStack.Screen name="Login" component={()=> <LoginScreen test={test} loadPosts={loadPosts}/>} />
       <UnloggedStack.Screen name="SignUp" component={()=> <SignUpScreen test={test} />} />
     </UnloggedStack.Navigator>
   )
@@ -81,11 +81,14 @@ function App() {
   useEffect(() => {
     async function checkToken() {
       const accessStatus = await checkingAccess();
+      console.log('accessStatus is: ' + accessStatus);
       setHaveAccess(accessStatus);
       // const token = await getValueFor("accessToken");
       // console.log ('stock token is:\n' + token);
       setCheckingToken(false);
-      loadPosts();
+      if (accessStatus) {
+        loadPosts();
+      }
       // setAccessToken(token);
     }
     checkToken();
@@ -103,12 +106,10 @@ function App() {
         { haveAccess ? (
           <LoggedStackScreens test={test} posts={posts} loadPosts={loadPosts}/>
           ) : (
-          <UnloggedStackScreens test={test} />
+          <UnloggedStackScreens test={test} loadPosts={loadPosts} />
         )}
     </NavigationContainer>
   );
 };
 
 export default App;
-
-

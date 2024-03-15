@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.1.159:3000/users/tokens/';
+const API_URL = 'http://192.168.1.53:3000/users/tokens/';
 
 
 async function saveAuth(key, value) {
@@ -32,7 +32,7 @@ function isEmailPasswordValid(email, password) {
   return true;
 }
 
-async function signIn(email, password, test){
+async function signIn(email, password, test, loadPosts){
   const emailPasswordIsValid = isEmailPasswordValid(email, password);
   if (!emailPasswordIsValid) return;
 
@@ -46,6 +46,7 @@ async function signIn(email, password, test){
       saveAuth("refreshToken", response.data.refresh_token);
       saveAuth("resourceOwer", response.data.resource_owner);
       test(response.status);
+      loadPosts();
   } catch (error) {
     // console.error(error);
     alert('Wrong email or password, please retry');
@@ -121,6 +122,7 @@ async function registerUser(email, password, rePassword, userName, test) {
         saveAuth("resourceOwer", newToken.data.resource_owner);
         return true
         }
+        return false
       }
     }
 

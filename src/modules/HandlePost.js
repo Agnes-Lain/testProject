@@ -1,7 +1,7 @@
 import { getValueFor, checkingAccess } from "./Authentify";
 import axios from "axios";
 
-const API_URL = "http://192.168.1.159:3000/api/v1/posts";
+const API_URL = "http://192.168.1.53:3000/api/v1/posts";
 
 
 async function setConfig () {

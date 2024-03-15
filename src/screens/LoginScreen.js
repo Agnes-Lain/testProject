@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   },
 });
 
-function LoginScreen ({ test }) {
+function LoginScreen ({ test, loadPosts }) {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,7 +49,7 @@ function LoginScreen ({ test }) {
 
       <Button
         title="Login now"
-        onPress={()=>{signIn(email, password, test)}}
+        onPress={()=>{signIn(email, password, test, loadPosts)}}
       />
       <View style={{marginBottom: 20}}/>
 
