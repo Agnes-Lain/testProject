@@ -3,12 +3,19 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React, {useEffect, useState} from 'react';
 import { View, Text } from 'react-native';
 // import HomeScreen  from './src/screens/HomeScreen';
-import Posts  from './src/screens/PostsScreen';
+import PostsScreen  from './src/screens/PostsScreen';
 import LoginScreen  from './src/screens/LoginScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
 import { checkingAccess } from './src/modules/Authentify';
 import NewPostScreen from './src/screens/NewPostScreen';
-import { getPosts } from './src/modules/HandlePost';
+// import { getPosts } from './src/modules/HandlePost';
+import store from './src/store/store';
+import { Provider } from 'react-redux';
+import { ApiProvider } from '@reduxjs/toolkit/query/react';
+import { postsApi } from './src/services/postsApi';
+import { useDispatch, useSelector } from "react-redux";
+import { setPosts } from "./src/store/loadPostsSlice";
+import { useGetPostsQuery } from './src/services/postsApi';
 
 const LoggedStack = createNativeStackNavigator();
 const UnloggedStack = createNativeStackNavigator();
@@ -25,29 +32,19 @@ const props = {
 }
 */
 
-function LoggedStackScreens({test, posts, loadPosts}) {
-// function LoggedStackScreens(props) {
-//   const { test, posts, setPosts } = props;
-
-  // const test = props.test;
-  // const { test: test } = props;
-  // const { test } = props;
-
-  // const posts = props.posts;
-  // const setPosts = props.setPosts;
-
+function LoggedStackScreens({test}) {
   return (
     <LoggedStack.Navigator>
-      <LoggedStack.Screen name="Posts" component={()=> <Posts test={test} posts={posts} loadPosts={loadPosts} />} />
-      <LoggedStack.Screen name="NewPost" component={() => <NewPostScreen loadPosts={loadPosts} />} />
+      <LoggedStack.Screen name="Posts" component={()=> <PostsScreen test={test} />} />
+      <LoggedStack.Screen name="NewPost" component={() => <NewPostScreen />} />
     </LoggedStack.Navigator>
   )
 }
 
-function UnloggedStackScreens({ test, loadPosts}) {
+function UnloggedStackScreens({ test}) {
   return (
     <UnloggedStack.Navigator>
-      <UnloggedStack.Screen name="Login" component={()=> <LoginScreen test={test} loadPosts={loadPosts}/>} />
+      <UnloggedStack.Screen name="Login" component={()=> <LoginScreen test={test}/>} />
       <UnloggedStack.Screen name="SignUp" component={()=> <SignUpScreen test={test} />} />
     </UnloggedStack.Navigator>
   )
@@ -57,7 +54,8 @@ function UnloggedStackScreens({ test, loadPosts}) {
 function App() {
   const [haveAccess, setHaveAccess] = useState(false);
   const [checkingToken, setCheckingToken] = useState(true);
-  const [posts, setPosts] = useState([]);
+  // const posts = useSelector((state) => state.loadPosts.value);
+  // const dispatch = useDispatch()
 
   function test(accessStatus) {
     console.log("test function is called with status: " + accessStatus);
@@ -68,28 +66,22 @@ function App() {
     }
   }
 
-  async function loadPosts() {
-    console.log('loadPosts');
-    try {
-      const posts = await getPosts();
-      setPosts(posts);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  // async function loadPosts() {
+  //   console.log('loadPosts');
+  //   try {
+  //     const posts = await getPosts();
+  //     setPosts(posts);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // }
 
   useEffect(() => {
     async function checkToken() {
       const accessStatus = await checkingAccess();
       console.log('accessStatus is: ' + accessStatus);
       setHaveAccess(accessStatus);
-      // const token = await getValueFor("accessToken");
-      // console.log ('stock token is:\n' + token);
       setCheckingToken(false);
-      if (accessStatus) {
-        loadPosts();
-      }
-      // setAccessToken(token);
     }
     checkToken();
   }, []);
@@ -101,15 +93,24 @@ function App() {
       </View>
     )
   }
+
   return (
     <NavigationContainer>
-        { haveAccess ? (
-          <LoggedStackScreens test={test} posts={posts} loadPosts={loadPosts}/>
-          ) : (
-          <UnloggedStackScreens test={test} loadPosts={loadPosts} />
+        {haveAccess ? (
+          <LoggedStackScreens test={test}/>
+        ) : (
+          <UnloggedStackScreens test={test} />
         )}
     </NavigationContainer>
   );
 };
 
-export default App;
+
+export default () => {
+  return (
+    <ApiProvider api={postsApi}>
+      <App />
+    </ApiProvider>
+  );
+};
+// export default App;

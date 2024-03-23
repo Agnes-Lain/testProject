@@ -49,7 +49,7 @@ function LoginScreen ({ test, loadPosts }) {
 
       <Button
         title="Login now"
-        onPress={()=>{signIn(email, password, test, loadPosts)}}
+        onPress={()=>{signIn(email, password, test)}}
       />
       <View style={{marginBottom: 20}}/>
 

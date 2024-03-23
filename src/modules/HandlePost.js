@@ -15,22 +15,22 @@ async function setConfig () {
       };
         return config;
       }
-    } catch (error) {
-      console.log(error);
-    }
-
+  } catch (error) {
+    console.log(error);
   }
+}
 
-  async function getPosts() {
-    try {
-      const config = await setConfig();
-      const response = await axios.get(API_URL, config);
-      // console.log('response.data: ', response.data);
-      return response.data;
-    } catch (error) {
-      console.error(error);
-    }
+
+async function getPosts() {
+  try {
+    console.log('now fetching posts...');
+    const config = await setConfig();
+    const response = await axios.get(API_URL, config);
+    return response.data;
+  } catch (error) {
+    console.error(error);
   }
+}
 
 
   async function deletePost(post_id) {
