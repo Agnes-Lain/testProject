@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Button, TouchableHighlight } from 'react-native';
 import { PostModal } from "../components/core";
 import { signOut } from '../modules/Authentify';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { getPosts, deletePost } from '../modules/HandlePost';
+import { useNavigation } from '@react-navigation/native';
+import { useGetPostsQuery,useDeletePostMutation } from '../services/postsApi';
 
 const styles = StyleSheet.create({
   main: {
@@ -43,109 +43,91 @@ const styles = StyleSheet.create({
   },
 });
 
-function Posts ({ test, posts, loadPosts }) {
-  // const [posts, setPosts] = useState([]);
+function PostsScreen ({ test }) {
   const [postInModal, setPostInModal] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
-  // const [isReRender, setIsReRender] = useState(false);
   const navigation = useNavigation();
 
-  function refreshPosts(status) {
-    if (status === 200 || status === 201 || status === 204){
-      // console.log("called reRenderPosts");
-      // setIsReRender(!isReRender);
-      // console.log("isReRender is now: " + isReRender);
-      loadPosts();
-    }
-  };
+  const {
+    data: posts,
+    isLoading,
+    isSuccess,
+    isError,
+    error
+  } = useGetPostsQuery();
 
-  const removePost = async (post_id) => {
-    // Fetch data from your API and update the state
-    try {
-      await deletePost(post_id)
-      console.log("post deleted");
-      // console.log(returnStatus)
-      // reRenderPosts(returnStatus)
-      // refreshPosts(returnStatus)
-      loadPosts();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  // async function loadPosts() {
-  //   console.log('loadPosts');
-  //   try {
-  //     const posts = await getPosts();
-  //     setPosts(posts);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   // console.log('useEffect');
-  //   loadPosts();
-  // }, [isReRender]);
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     loadPosts();
-
-  //     return () => {
-  //       // Do something when the screen is unfocused
-  //       // Useful for cleanup functions
-  //     };
-  //   }, [])
-  // );
+  const [deletePost] = useDeletePostMutation()
 
   const openModal = (post) => {
     setPostInModal(post)
     setModalVisible(true);
   };
 
-  return (
-    <View style={styles.main}>
-    <ScrollView style={{flex: 1}}>
-      <View style={styles.maincontainer}>
-        {posts.map((post) => (
-          <View key={post.id} style={styles.item}>
-            <TouchableOpacity activeOpacity={0.6} onPress={()=>openModal(post)}>
-              <Text style={styles.headerOne}>
-                {post.id} - {post.title}
-              </Text>
-            </TouchableOpacity>
-            <View style = {{marginTop: 5, flexDirection:'row', justifyContent: 'space-between'}}>
-              <Text style={styles.textPrimary}>
-                Author: {post.user.user_name}
-              </Text>
-              <TouchableHighlight onPress={()=>{removePost(post.id)}}>
-                <View>
-                    <Text style={{color:'red'}}>Delete</Text>
-                </View>
-              </TouchableHighlight>
+  function postsList() {
+    return (
+      <ScrollView style={{flex: 1}}>
+        <View style={styles.maincontainer}>
+          {posts?.map((post) => (
+            <View key={post.id} style={styles.item}>
+              <TouchableOpacity activeOpacity={0.6} onPress={()=>openModal(post)}>
+                <Text style={styles.headerOne}>
+                  {post.id} - {post.title}
+                </Text>
+              </TouchableOpacity>
+              <View style = {{marginTop: 5, flexDirection:'row', justifyContent: 'space-between'}}>
+                <Text style={styles.textPrimary}>
+                  Author: {post.user.user_name}
+                </Text>
+                <TouchableHighlight onPress={()=>deletePost(post.id)}>
+                  <View>
+                      <Text style={{color:'red'}}>Delete</Text>
+                  </View>
+                </TouchableHighlight>
+              </View>
             </View>
-          </View>
-        ))}
+          ))}
+        </View>
+      </ScrollView>
+    )
+  }
+
+  let content;
+  if (isLoading) {
+    content = <Text>Is loading...</Text>
+  } else if (isSuccess) {
+    console.log(posts);
+    content = postsList();
+  } else if (isError) {
+    content = <Text>{error.message}</Text>
+  } else {
+    content = <Text>Unexpected state</Text>;
+  }
+
+
+  return (
+    // <View>{content}</View>
+    <View style={styles.main}>
+      {/* <View>{content}</View> */}
+      <View style={{ flex:1 }}>
+        {postsList()}
       </View>
-    </ScrollView>
-    <PostModal
-      modalVisible={modalVisible}
-      setModalVisible={setModalVisible}
-      postInModal={postInModal}
-    />
-    <View style={styles.bottomView}>
-      <Button
-        title="Log out"
-        onPress={()=>{signOut(test)}}
+      <PostModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        postInModal={postInModal}
       />
-      <Button
-        title="New post"
-        onPress={()=>navigation.navigate('NewPost')}
-      />
+      <View style={styles.bottomView}>
+        <Button
+          title="Log out"
+          onPress={()=>{signOut(test)}}
+        />
+        <Button
+          title="New post"
+          onPress={()=>navigation.navigate('NewPost')}
+        />
+      </View>
     </View>
-  </View>
   )
 }
 
-export default Posts;
+export default PostsScreen;

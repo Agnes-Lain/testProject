@@ -32,8 +32,9 @@ function isEmailPasswordValid(email, password) {
   return true;
 }
 
-async function signIn(email, password, test, loadPosts){
+async function signIn(email, password, test){
   const emailPasswordIsValid = isEmailPasswordValid(email, password);
+
   if (!emailPasswordIsValid) return;
 
   try {
@@ -46,7 +47,7 @@ async function signIn(email, password, test, loadPosts){
       saveAuth("refreshToken", response.data.refresh_token);
       saveAuth("resourceOwer", response.data.resource_owner);
       test(response.status);
-      loadPosts();
+      dispatch(setPosts())
   } catch (error) {
     // console.error(error);
     alert('Wrong email or password, please retry');

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { postNewPost } from '../modules/HandlePost';
 import { useNavigation } from '@react-navigation/native';
+import { useAddPostMutation } from '../services/postsApi';
+
 
 const styles = StyleSheet.create({
   container: {
@@ -25,20 +27,18 @@ const styles = StyleSheet.create({
   },
 });
 
-function NewPostScreen ({ loadPosts }) {
+function NewPostScreen () {
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const navigation = useNavigation();
+  const [addPost, result] = useAddPostMutation()
 
   async function returnToPosts() {
-    const status = await postNewPost(title, content);
-    console.log("status is: " + status);
-    if (status === 201){
-      // TODO add post to post list or refresh the list
-      navigation.navigate('Posts');
-      loadPosts();
-    }
+    // const status = await postNewPost(title, content);
+    // console.log("status is: " + status);
+    await addPost({title: title, content: content})
+    navigation.navigate('Posts');
   }
 
   return (
