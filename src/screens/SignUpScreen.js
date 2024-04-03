@@ -1,7 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
-import { SafeAreaView, View, TextInput, StyleSheet, Button, Text } from "react-native";
+import React, {useState} from 'react';
+import { SafeAreaView, TextInput, StyleSheet, Button, Text } from "react-native";
 import { registerUser } from '../modules/Authentify';
+import { useDispatch } from 'react-redux';
+import { updateAccess } from '../store/authSlice';
+
 
 const styles = StyleSheet.create({
   container: {
@@ -26,12 +28,21 @@ const styles = StyleSheet.create({
   },
 });
 
-function SignUpScreen ({test}) {
+function SignUpScreen () {
   // navigation={navigation}
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rePassword, setRePassword] = useState('');
   const [userName, setUserName] = useState('');
+
+  const dispatch = useDispatch();
+
+  async function registerUserUp(mail, password, rePassword, userName) {
+    const result = await registerUser(mail, password, rePassword, userName)
+    if (result) {
+      dispatch(updateAccess(true))
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -63,7 +74,7 @@ function SignUpScreen ({test}) {
 
       <Button
         title="Sign up now"
-        onPress={()=>registerUser( email, password, rePassword, userName, test )}
+        onPress={()=>{registerUserUp(email, password, rePassword, userName)}}
       />
     </SafeAreaView>
   )

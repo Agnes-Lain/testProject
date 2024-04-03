@@ -6,100 +6,79 @@ import { View, Text } from 'react-native';
 import PostsScreen  from './src/screens/PostsScreen';
 import LoginScreen  from './src/screens/LoginScreen';
 import SignUpScreen from './src/screens/SignUpScreen';
-import { checkingAccess } from './src/modules/Authentify';
+import { updateAccessStatus } from './src/modules/Authentify';
 import NewPostScreen from './src/screens/NewPostScreen';
-// import { getPosts } from './src/modules/HandlePost';
-import store from './src/store/store';
+import {store} from './src/store/store';
 import { Provider } from 'react-redux';
-import { ApiProvider } from '@reduxjs/toolkit/query/react';
-import { postsApi } from './src/services/postsApi';
-import { useDispatch, useSelector } from "react-redux";
-import { setPosts } from "./src/store/loadPostsSlice";
-import { useGetPostsQuery } from './src/services/postsApi';
+// import { ApiProvider } from '@reduxjs/toolkit/query/react';
+// import { postsApi } from './src/services/postsApi';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateAccess, updateCheckingToken } from './src/store/authSlice';
 
 const LoggedStack = createNativeStackNavigator();
 const UnloggedStack = createNativeStackNavigator();
 
-/*
-const props = {
-  test: function test() {
-    console.log('test');
-  },
-  posts: [],
-  setPosts: function setPosts() {
-    console.log('setPosts');
-  }
-}
-*/
-
-function LoggedStackScreens({test}) {
+function LoggedStackScreens() {
   return (
     <LoggedStack.Navigator>
-      <LoggedStack.Screen name="Posts" component={()=> <PostsScreen test={test} />} />
-      <LoggedStack.Screen name="NewPost" component={() => <NewPostScreen />} />
+      <LoggedStack.Screen name="Posts" component={PostsScreen}/>
+      <LoggedStack.Screen name="NewPost" component={NewPostScreen}/>
     </LoggedStack.Navigator>
   )
 }
 
-function UnloggedStackScreens({ test}) {
+function UnloggedStackScreens() {
   return (
     <UnloggedStack.Navigator>
-      <UnloggedStack.Screen name="Login" component={()=> <LoginScreen test={test}/>} />
-      <UnloggedStack.Screen name="SignUp" component={()=> <SignUpScreen test={test} />} />
+      <UnloggedStack.Screen name="Login" component={LoginScreen}/>
+      <UnloggedStack.Screen name="SignUp" component={SignUpScreen}/>
     </UnloggedStack.Navigator>
   )
 }
 
 
 function App() {
-  const [haveAccess, setHaveAccess] = useState(false);
-  const [checkingToken, setCheckingToken] = useState(true);
-  // const posts = useSelector((state) => state.loadPosts.value);
-  // const dispatch = useDispatch()
+  // const [haveAccess, setHaveAccess] = useState(false);
+  // const [checkingToken, setCheckingToken] = useState(true);
 
-  function test(accessStatus) {
-    console.log("test function is called with status: " + accessStatus);
-    if (accessStatus === 200 || accessStatus === 201){
-      setHaveAccess(true);
-    } else {
-      setHaveAccess(false);
-    }
-  }
+  // const globalState = useSelector((state)=>console.log(state))
+  const access = useSelector((state) => state.authStatus.accessStatus)
+  const tokenStatus = useSelector((state) => state.authStatus.checkingToken)
+  const dispatch = useDispatch()
 
-  // async function loadPosts() {
-  //   console.log('loadPosts');
-  //   try {
-  //     const posts = await getPosts();
-  //     setPosts(posts);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
+
 
   useEffect(() => {
-    async function checkToken() {
-      const accessStatus = await checkingAccess();
-      console.log('accessStatus is: ' + accessStatus);
-      setHaveAccess(accessStatus);
-      setCheckingToken(false);
+    async function checkAcess() {
+      const result = await updateAccessStatus()
+      // console.log(result)
+      if (result) {
+        // console.log("dispatch")
+        dispatch(updateAccess(true))
+        dispatch(updateCheckingToken(false))
+      } else {
+      dispatch(updateAccess(false))
+      dispatch(updateCheckingToken(false))
+      }
     }
-    checkToken();
+    checkAcess()
   }, []);
 
-  if (checkingToken) {
+  if (tokenStatus) {
     return (
       <View style={{justifyContent:'center',flex: 1, alignItems: 'center'}}>
         <Text>Checking token...</Text>
       </View>
     )
   }
+  // console.log("part 2")
 
   return (
     <NavigationContainer>
-        {haveAccess ? (
-          <LoggedStackScreens test={test}/>
+        {access ? (
+          <LoggedStackScreens/>
         ) : (
-          <UnloggedStackScreens test={test} />
+          <UnloggedStackScreens/>
         )}
     </NavigationContainer>
   );
@@ -108,9 +87,10 @@ function App() {
 
 export default () => {
   return (
-    <ApiProvider api={postsApi}>
-      <App />
-    </ApiProvider>
+    <Provider store={store}>
+
+        <App />
+
+    </Provider>
   );
 };
-// export default App;

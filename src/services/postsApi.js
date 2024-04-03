@@ -1,9 +1,10 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { fetchBaseQuery } from '@reduxjs/toolkit/query'
-import { getValueFor, checkingAccess } from "../modules/Authentify";
+import { updateAccessStatus } from "../modules/Authentify";
+import {getValueFor} from "../utils/secreteStore";
 
-const API_URL = 'http://192.168.1.53:3000/api/v1';
+const API_URL = 'http://192.168.1.53:3000';
 
 // Helper function to fetch the access token
 const getAccessToken = async () => {
@@ -16,10 +17,15 @@ const getAccessToken = async () => {
   }
 };
 
+// const getRefreshToken = async () => {
+//   const token = await getValueFor('refreshToken');
+//   return token
+// };
+
 // Helper function to check access and fetch configuration with authorization headers
 const getTokenWithAuthorization = async () => {
   try {
-    const hasAccess = await checkingAccess();
+    const hasAccess = await updateAccessStatus();
     if (!hasAccess) {
       throw new Error('Access denied');
     }
@@ -47,36 +53,35 @@ export const postsApi = createApi({
       }
     }
   }),
-  tagTypes: ['Post'],
+  tagTypes: ['Posts'],
   endpoints: (builder) => ({
     getPosts: builder.query({
-      query: () => '/posts',
-      providesTags: ['Post']
+      query: () => '/api/v1/posts',
+      providesTags: ['Posts']
     }),
     addPost: builder.mutation({
       query: (post) => ({
-        url:'/posts',
+        url:'/api/v1/posts',
         method: 'POST',
         body: post
       }),
-      invalidatesTags: ['Post'],
-
+      invalidatesTags: ['Posts'],
     }),
     updatePost: builder.mutation({
       query: (post) => ({
-        url:`/posts/${post.id}`,
+        url:`/api/v1/posts/${post.id}`,
         method: 'PATCH',
         body: post
       }),
-      invalidatesTags: ['Post'],
+      invalidatesTags: ['Posts'],
     }),
     deletePost: builder.mutation({
       query: (id) => ({
-        url:`/posts/${id}`,
+        url:`/api/v1/posts/${id}`,
         method: 'DELETE',
         body: id
       }),
-      invalidatesTags: ['Post'],
+      invalidatesTags: ['Posts'],
     })
   }),
 });

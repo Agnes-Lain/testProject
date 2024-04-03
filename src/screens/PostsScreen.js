@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Button, TouchableHighlight } from 'react-native';
 import { PostModal } from "../components/core";
 import { signOut } from '../modules/Authentify';
 import { useNavigation } from '@react-navigation/native';
 import { useGetPostsQuery,useDeletePostMutation } from '../services/postsApi';
+import { useDispatch } from 'react-redux';
+import { updateAccess } from '../store/authSlice';
+import { postsApi } from '../services/postsApi';
 
 const styles = StyleSheet.create({
   main: {
@@ -43,10 +46,12 @@ const styles = StyleSheet.create({
   },
 });
 
-function PostsScreen ({ test }) {
+function PostsScreen () {
   const [postInModal, setPostInModal] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
+  const dispatch = useDispatch()
+
 
   const {
     data: posts,
@@ -57,6 +62,14 @@ function PostsScreen ({ test }) {
   } = useGetPostsQuery();
 
   const [deletePost] = useDeletePostMutation()
+
+  async function signedUserOut() {
+    const result = await signOut()
+    if (result) {
+      dispatch(updateAccess(false))
+      dispatch(postsApi.util.resetApiState());
+    }
+  }
 
   const openModal = (post) => {
     setPostInModal(post)
@@ -95,7 +108,7 @@ function PostsScreen ({ test }) {
   if (isLoading) {
     content = <Text>Is loading...</Text>
   } else if (isSuccess) {
-    console.log(posts);
+    // console.log(posts);
     content = postsList();
   } else if (isError) {
     content = <Text>{error.message}</Text>
@@ -119,7 +132,7 @@ function PostsScreen ({ test }) {
       <View style={styles.bottomView}>
         <Button
           title="Log out"
-          onPress={()=>{signOut(test)}}
+          onPress={()=> signedUserOut()}
         />
         <Button
           title="New post"

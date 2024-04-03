@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { postNewPost } from '../modules/HandlePost';
 import { useNavigation } from '@react-navigation/native';
 import { useAddPostMutation } from '../services/postsApi';
 
@@ -32,7 +31,7 @@ function NewPostScreen () {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const navigation = useNavigation();
-  const [addPost, result] = useAddPostMutation()
+  const [addPost] = useAddPostMutation()
 
   async function returnToPosts() {
     // const status = await postNewPost(title, content);

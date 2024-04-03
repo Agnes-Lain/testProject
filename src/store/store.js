@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-// import loadPostsSlice from "./loadPostsSlice";
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { postsApi } from '../services/postsApi'
+import authReducer from "./authSlice";
+// import { authApi } from "../services/authAPI";
 
-const store = configureStore({
+
+export const store = configureStore({
   reducer: {
-    // loadPosts: loadPostsSlice,
+    authStatus: authReducer,
     [postsApi.reducerPath]:postsApi.reducer,
    },
    middleware: (getDefaultMiddleware) =>
@@ -13,5 +15,3 @@ const store = configureStore({
 });
 
 setupListeners(store.dispatch)
-
-export default store;

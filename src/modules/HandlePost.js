@@ -1,12 +1,13 @@
-import { getValueFor, checkingAccess } from "./Authentify";
+import { getValueFor } from "../utils/secreteStore";
 import axios from "axios";
+import { updateAccessStatus } from "./Authentify";
 
 const API_URL = "http://192.168.1.53:3000/api/v1/posts";
 
 
 async function setConfig () {
   try {
-    const hasAccess = await checkingAccess();
+    const hasAccess = await updateAccessStatus();
     // console.log('hasAccess: ', hasAccess);
     if (hasAccess) {
       const token = await getValueFor("accessToken");

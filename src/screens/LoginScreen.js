@@ -2,6 +2,9 @@ import React, {useState} from 'react';
 import { SafeAreaView, View, TextInput, StyleSheet, Button, Text } from "react-native";
 import { signIn } from '../modules/Authentify';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { updateAccess } from '../store/authSlice';
+// import { useSignInMutation } from '../services/authAPI';
 
 const styles = StyleSheet.create({
   container: {
@@ -26,11 +29,18 @@ const styles = StyleSheet.create({
   },
 });
 
-function LoginScreen ({ test, loadPosts }) {
+function LoginScreen () {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  // const [accessToken, setAccessToken] = useState();
+  const dispatch = useDispatch();
+
+  async function signedUserIn (email, password) {
+    const response = await signIn(email, password)
+    if (response) {
+      dispatch(updateAccess(true))
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -49,7 +59,7 @@ function LoginScreen ({ test, loadPosts }) {
 
       <Button
         title="Login now"
-        onPress={()=>{signIn(email, password, test)}}
+        onPress={() => signedUserIn(email, password) }
       />
       <View style={{marginBottom: 20}}/>
 
